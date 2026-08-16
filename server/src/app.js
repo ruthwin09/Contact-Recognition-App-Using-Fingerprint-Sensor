@@ -2,8 +2,11 @@ const express = require('express');
 const cors = require('cors');
 const helmet = require('helmet');
 const morgan = require('morgan');
+
 const authRoutes = require('./routes/authRoutes');
 const contactRoutes = require('./routes/contactRoutes');
+const fingerprintRoutes = require('./routes/fingerprintRoutes');
+const recognitionRoutes = require('./routes/recognitionRoutes');
 const { apiLimiter } = require('./middleware/rateLimiter');
 const db = require('./config/db');
 
@@ -37,9 +40,11 @@ app.get('/api/health', async (req, res) => {
   });
 });
 
-// Mount Routes
+// Mount All Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/contacts', contactRoutes);
+app.use('/api/fingerprints', fingerprintRoutes);
+app.use('/api', recognitionRoutes);
 
 // Root endpoint
 app.get('/', (req, res) => {
@@ -47,16 +52,13 @@ app.get('/', (req, res) => {
     name: 'Contact Recognition App Using Fingerprint Sensor API',
     version: '1.0.0',
     status: 'online',
-    documentation: '/api/docs'
+    endpoints: ['/api/health', '/api/auth', '/api/contacts', '/api/fingerprints', '/api/recognition', '/api/devices', '/api/dashboard']
   });
 });
 
 // 404 Handler
-app.use((req, res, next) => {
-  res.status(404).json({
-    success: false,
-    message: `Endpoint ${req.originalUrl} not found`
-  });
+app.use((req, res) => {
+  res.status(404).json({ success: false, message: `Endpoint ${req.originalUrl} not found` });
 });
 
 // Global Error Handler
