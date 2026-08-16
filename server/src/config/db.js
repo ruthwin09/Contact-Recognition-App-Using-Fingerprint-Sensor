@@ -249,17 +249,7 @@ function executeMockQuery(sql, params) {
     }
 
     if (normalizedSql.includes('FROM `CONTACTS`') || normalizedSql.includes('FROM CONTACTS')) {
-      if (normalizedSql.includes('JOIN `FINGERPRINTS`') || normalizedSql.includes('JOIN FINGERPRINTS') || normalizedSql.includes('LEFT JOIN FINGERPRINTS')) {
-        return mockDb.contacts.map(c => {
-          const fp = mockDb.fingerprints.find(f => f.contact_id === c.id && f.status === 'ACTIVE');
-          return {
-            ...c,
-            fingerprint_id: fp ? fp.fingerprint_id : null,
-            sensor_type: fp ? fp.sensor_type : null,
-            fingerprint_status: fp ? fp.status : 'UNENROLLED'
-          };
-        });
-      }
+      let list = [...mockDb.contacts];
 
       if (normalizedSql.includes('WHERE C.ID = ?') || normalizedSql.includes('WHERE `ID` = ?') || normalizedSql.includes('WHERE ID = ?')) {
         const id = parseInt(params[0], 10);
@@ -270,10 +260,38 @@ function executeMockQuery(sql, params) {
           ...contact,
           fingerprint_id: fp ? fp.fingerprint_id : null,
           sensor_type: fp ? fp.sensor_type : null,
+          sensor_identifier: fp ? fp.sensor_identifier : null,
           fingerprint_status: fp ? fp.status : 'UNENROLLED'
         }];
       }
-      return [...mockDb.contacts];
+
+      if (normalizedSql.includes('JOIN `FINGERPRINTS`') || normalizedSql.includes('JOIN FINGERPRINTS') || normalizedSql.includes('LEFT JOIN FINGERPRINTS')) {
+        let results = list.map(c => {
+          const fp = mockDb.fingerprints.find(f => f.contact_id === c.id && f.status === 'ACTIVE');
+          return {
+            ...c,
+            fingerprint_id: fp ? fp.fingerprint_id : null,
+            sensor_type: fp ? fp.sensor_type : null,
+            sensor_identifier: fp ? fp.sensor_identifier : null,
+            fingerprint_status: fp ? fp.status : 'UNENROLLED'
+          };
+        });
+
+        if (normalizedSql.includes('LIKE ?')) {
+          const searchTerm = (params[0] || '').replace(/%/g, '').toLowerCase();
+          if (searchTerm) {
+            results = results.filter(c =>
+              (c.name && c.name.toLowerCase().includes(searchTerm)) ||
+              (c.phone && c.phone.includes(searchTerm)) ||
+              (c.email && c.email.toLowerCase().includes(searchTerm)) ||
+              (c.company_or_organization && c.company_or_organization.toLowerCase().includes(searchTerm))
+            );
+          }
+        }
+        return results;
+      }
+
+      return list;
     }
 
     if (normalizedSql.includes('FROM `FINGERPRINTS`') || normalizedSql.includes('FROM FINGERPRINTS')) {

@@ -3,6 +3,7 @@ const cors = require('cors');
 const helmet = require('helmet');
 const morgan = require('morgan');
 const authRoutes = require('./routes/authRoutes');
+const contactRoutes = require('./routes/contactRoutes');
 const { apiLimiter } = require('./middleware/rateLimiter');
 const db = require('./config/db');
 
@@ -38,6 +39,7 @@ app.get('/api/health', async (req, res) => {
 
 // Mount Routes
 app.use('/api/auth', authRoutes);
+app.use('/api/contacts', contactRoutes);
 
 // Root endpoint
 app.get('/', (req, res) => {
