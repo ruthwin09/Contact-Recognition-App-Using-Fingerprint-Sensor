@@ -1,0 +1,32 @@
+{
+  "name": "contact-recognition-app-using-fingerprint-sensor",
+  "version": "1.0.0",
+  "description": "Production-ready biometric contact recognition web application with ESP32 and AS608/R307 sensor integration",
+  "main": "server/src/server.js",
+  "scripts": {
+    "start": "node server/src/server.js",
+    "server": "npm --prefix server run dev",
+    "client": "npm --prefix client run dev",
+    "dev": "concurrently \"npm --prefix server run dev\" \"npm --prefix client run dev\"",
+    "install:all": "npm install && npm --prefix server install && npm --prefix client install",
+    "test": "npm --prefix server test",
+    "build": "npm --prefix client run build"
+  },
+  "keywords": [
+    "biometrics",
+    "fingerprint",
+    "as608",
+    "r307",
+    "esp32",
+    "iot",
+    "contact-management",
+    "react",
+    "express",
+    "mysql"
+  ],
+  "author": "Antigravity Engineering Team",
+  "license": "MIT",
+  "devDependencies": {
+    "concurrently": "^9.1.2"
+  }
+}
